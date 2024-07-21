@@ -1,6 +1,6 @@
 variable "credentials" {
   description = "My Credentials"
-  default     = "~/Documents/Projects/secrets/seoul-city-bike-9200631df9aa.json"
+  default     = "~/Documents/Projects/secrets/useful-circle-430118-u0-3c3daef12ab4.json"
   #ex: if you have a directory where this file is called keys with your service account json file
   #saved there as my-creds.json you could use default = "./keys/my-creds.json"
 }
@@ -8,7 +8,7 @@ variable "credentials" {
 
 variable "project" {
   description = "Project"
-  default     = "seoul-city-bike"
+  default     = "useful-circle-430118-u0"
 }
 
 variable "region" {
@@ -26,16 +26,37 @@ variable "location" {
 variable "bq_dataset_name" {
   description = "My BigQuery Dataset Name"
   #Update the below to what you want your dataset to be called
-  default     = "seoul_city_bike_dataset"
+  default     = "seoul_bike_trips_dataset"
 }
 
-variable "gcs_bucket_name" {
+variable "gcs_data_bucket_name" {
   description = "My Storage Bucket Name"
   #Update the below to a unique bucket name
-  default     = "seoul-city-bike-bucket"
+  default     = "seoul-bike-trips-bucket"
 }
 
 variable "gcs_storage_class" {
   description = "Bucket Storage Class"
   default     = "STANDARD"
+}
+
+variable "gcs_cluster_bucket_name" {
+  description = "My Storage Bucket Name"
+  #Update the below to a unique bucket name
+  default     = "seoul-bike-trips-spark-cluster"
+}
+
+variable "dataproc_cluster_name" {
+  description = "Dataproc cluster for Spark jobs"
+  default = "dataproc-spark-cluster"
+}
+
+variable "dataproc_cluster_zone" {
+  description = "Dataproc cluster for Spark jobs"
+  default = "europe-west9-a"
+}
+
+variable "gce_service_account" {
+  description = "Dataproc service account"
+  default = "seoul-bike-data@useful-circle-430118-u0.iam.gserviceaccount.com"
 }

@@ -80,21 +80,21 @@ def read_data(file_path: str) -> pl.DataFrame:
 def transform_df(df: pl.DataFrame) -> pl.DataFrame:
     df = df\
         .with_columns(pl.datetime(year=2023,month=df["Pmonth"],day=df["Pday"],hour=df["Phour"],minute=df["Pmin"],time_zone="Asia/Seoul").alias("pickup_datetime"))\
-        .with_columns(pl.datetime(year=2023,month=df["Dmonth"],day=df["Dday"],hour=df["Dhour"],minute=df["Dmin"],time_zone="Asia/Seoul").alias("dropoff_datetime"))\
-        .with_columns(pl.date(year=2023,month=df["Pmonth"],day=df["Pday"]).alias("pickup_date"))\
-        .with_columns(pl.date(year=2023,month=df["Dmonth"],day=df["Dday"]).alias("dropoff_date"))
+        .with_columns(pl.datetime(year=2023,month=df["Dmonth"],day=df["Dday"],hour=df["Dhour"],minute=df["Dmin"],time_zone="Asia/Seoul").alias("dropoff_datetime"))
+        #.with_columns(pl.date(year=2023,month=df["Pmonth"],day=df["Pday"]).alias("pickup_date"))\
+        #.with_columns(pl.date(year=2023,month=df["Dmonth"],day=df["Dday"]).alias("dropoff_date"))
     
     #drop the columns with the individual datetime data
     columns_to_drop = ["Pmonth","Pday","Phour","Pmin","Dmonth","Dday","Dhour","Dmin"]
     df_dropped = df.drop(columns_to_drop)
-    if Path("./data/seoul_bike.parquet").is_file() == False:
-        df_dropped.write_parquet("./data/seoul_bike.parquet")
+    #if Path("./data/seoul_bike.parquet").is_file() == False:
+    #    df_dropped.write_parquet("./data/seoul_bike.parquet")
     return df_dropped
 
 @flow(name="Upload data",log_prints=True)
 def upload_to_gcs(df: pl.DataFrame, root_path: str):
     
-    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "../secrets/seoul-city-bike-9200631df9aa.json"
+    #os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "../secrets/seoul-bike-data-b84fa46ad5c1.json"
         
     #get the gcs filesystem
     gcs = pa.fs.GcsFileSystem()
@@ -103,7 +103,7 @@ def upload_to_gcs(df: pl.DataFrame, root_path: str):
     pq.write_to_dataset(
         table=df.to_arrow(),
         root_path=root_path,
-        partition_cols=['pickup_date'],
+        #partition_cols=['pickup_date'],
         filesystem=gcs
         )
     
@@ -129,7 +129,7 @@ def seoul_bike_trips():
 
     #upload the data to gcs
     gcs_path = f"seoul-city-bike-bucket/bike-data"
-    #upload_to_gcs(df_datetime, gcs_path)
+    upload_to_gcs(df_datetime, gcs_path)
 
 if __name__ == "__main__":
     parameters = {"dataset_owner": "tagg27", "dataset_name": "seoul-bike-trip", "file_path": "./data/", "filename": "cleaned_seoul_bike_data.csv"}
