@@ -1,4 +1,5 @@
-polars
+pandas
 prefect
 prefect-gcp
+prefect-aws
 kaggle
