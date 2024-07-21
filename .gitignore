@@ -1,3 +1,7 @@
 /seoul-bike-env
 /seoul-bike-trip.zip
-/data/For_modeling.csv
+/data/
+/terraform/.terraform
+/terraform/.terraform.lock.hcl
+/terraform/terraform.tfstate
+/__pycache__
