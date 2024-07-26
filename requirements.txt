@@ -1,5 +1,6 @@
-pandas
+polars
 prefect
 prefect-gcp
 kaggle
 pyarrow
+pyspark
