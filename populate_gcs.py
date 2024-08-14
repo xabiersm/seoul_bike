@@ -10,10 +10,6 @@ from kaggle.api.kaggle_api_extended import KaggleApi
 
 #import polars
 import polars as pl
-import zoneinfo
-
-#import pandas (needed to apply transformations in spark since pandas is supported by spark)
-import pandas as pd
 
 #import pathlib
 from pathlib import Path
@@ -28,8 +24,8 @@ from datetime import timedelta, datetime
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-#@task(name="Download_data",description="Checks if the file already exists and download it to a local path.",retries=3,retry_delay_seconds=1,
-      #cache_key_fn=task_input_hash,cache_expiration=timedelta(days=1))
+@task(name="Download_data",description="Checks if the file already exists and download it to a local path.",retries=3,retry_delay_seconds=1,
+      cache_key_fn=task_input_hash,cache_expiration=timedelta(days=1))
 def download_data(dataset_owner: str, dataset_name: str, path: str, file_name: str):
     api = KaggleApi()
     api.authenticate()
@@ -40,7 +36,7 @@ def download_data(dataset_owner: str, dataset_name: str, path: str, file_name: s
         print("Directory already exists, no need to create it")
         
     my_file = Path(f"{path}{file_name}")
-    print(my_file)
+    # print(my_file)
     
     if my_file.is_file():
         print("File already exists, no need to download")
@@ -49,7 +45,7 @@ def download_data(dataset_owner: str, dataset_name: str, path: str, file_name: s
         
 
 
-#@task(name="Read_data",description="Read data from the csv file and create a DataFrame")
+@task(name="Read_data",description="Read data from the csv file and create a DataFrame")
 def read_data(file_path: str):
     schema = {
         "Duration": pl.Int8,
@@ -78,17 +74,14 @@ def read_data(file_path: str):
         "GroundTemp": pl.Float32,
         "Dust": pl.Float32
     }
-
     
     #read to polars dataframe
     df = pl.read_csv(file_path,schema=schema,separator=",")
     
     return df
 
-#@flow(name="Upload data",log_prints=True)
-def upload_to_gcs(df: pd.DataFrame, root_path: str):
-    #os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = "../secrets/seoul-bike-data-b84fa46ad5c1.json"
-        
+@flow(name="Upload data",log_prints=True)
+def upload_to_gcs(df: pl.DataFrame, root_path: str):       
     #get the gcs filesystem
     gcs = pa.fs.GcsFileSystem()
     
@@ -96,14 +89,13 @@ def upload_to_gcs(df: pd.DataFrame, root_path: str):
     pq.write_to_dataset(
         table=df.to_arrow(),
         root_path=root_path,
-        #partition_cols=['pickup_date'],
         filesystem=gcs,
         basename_template="seoul_bike-{i}.parquet"
         )    
     
-#@flow(name='Ingest data')
-#def seoul_bike_trips(dataset_owner: str, dataset_name: str, file_path: str, filename: str):
-def seoul_bike_trips():
+@flow(name='Ingest data')
+def seoul_bike_trips(dataset_owner: str, dataset_name: str, file_path: str, filename: str):
+# def seoul_bike_trips():
     dataset_owner = "tagg27"
     dataset_name = "seoul-bike-data"
     file_path = "./data/"
@@ -116,9 +108,6 @@ def seoul_bike_trips():
     datafile_path = f"{file_path}{filename}"
     df = read_data(datafile_path)
     
-    #transform the month, day, hour and min cols to a datetime column and drop the columns
-    #df_transformed = transform_df(df)
-    
     #upload the data as it is to gcs
     gcs_path = f"seoul-bike-trips-bucket/bike-data"
     #parquet_path = f"./data/parquet"
@@ -126,8 +115,8 @@ def seoul_bike_trips():
     #upload_to_gcs(root_path=gcs_path,local_path=parquet_path)
 
 if __name__ == "__main__":
-    #parameters = {"dataset_owner": "tagg27", "dataset_name": "seoul-bike-trip", "file_path": "./data/", "filename": "cleaned_seoul_bike_data.csv"}
-    #seoul_bike_trips.serve(name="Seoul city bike trips",parameters=parameters,schedule=IntervalSchedule(interval=timedelta(days=1),anchor_date=datetime(2024,1,1,0,0),timezone="Europe/Berlin"))
-    seoul_bike_trips()
+    parameters = {"dataset_owner": "tagg27", "dataset_name": "seoul-bike-trip", "file_path": "./data/", "filename": "cleaned_seoul_bike_data.csv"}
+    seoul_bike_trips.serve(name="Seoul city bike trips",parameters=parameters,schedule=IntervalSchedule(interval=timedelta(days=1),anchor_date=datetime(2024,1,1,0,0),timezone="Europe/Berlin"))
+    # seoul_bike_trips()
     #seoul_bike_trips(parameters)
    
