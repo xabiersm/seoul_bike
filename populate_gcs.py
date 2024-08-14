@@ -1,7 +1,5 @@
 #import Prefect to orchestrate and load data to gcp
 from prefect import flow, task
-from prefect_gcp.cloud_storage import GcsBucket
-from prefect_gcp.bigquery import bigquery_load_cloud_storage
 from prefect.tasks import task_input_hash
 from prefect.client.schemas.schedules import IntervalSchedule
 
@@ -33,13 +31,13 @@ def download_data(dataset_owner: str, dataset_name: str, path: str, file_name: s
     try:
         os.mkdir(path)
     except OSError as error:
-        print("Directory already exists, no need to create it")
+        print("Directory already exists, there is no need to create it.")
         
     my_file = Path(f"{path}{file_name}")
     # print(my_file)
     
     if my_file.is_file():
-        print("File already exists, no need to download")
+        print("File already exists, there is no need to download it.")
     else:
         api.dataset_download_files(dataset=f"{dataset_owner}/{dataset_name}", path=path,unzip=True)
         
@@ -93,13 +91,13 @@ def upload_to_gcs(df: pl.DataFrame, root_path: str):
         basename_template="seoul_bike-{i}.parquet"
         )    
     
-@flow(name='Ingest data')
+@flow(name='Ingest data to GCS')
 def seoul_bike_trips(dataset_owner: str, dataset_name: str, file_path: str, filename: str):
 # def seoul_bike_trips():
-    dataset_owner = "tagg27"
-    dataset_name = "seoul-bike-data"
-    file_path = "./data/"
-    filename = "cleaned_seoul_bike_data.csv"
+    # dataset_owner = "tagg27"
+    # dataset_name = "seoul-bike-data"
+    # file_path = "./data/"
+    # filename = "cleaned_seoul_bike_data.csv"
     
     #download (if necessary) the data
     download_data(dataset_owner, dataset_name, file_path, filename)
@@ -116,7 +114,5 @@ def seoul_bike_trips(dataset_owner: str, dataset_name: str, file_path: str, file
 
 if __name__ == "__main__":
     parameters = {"dataset_owner": "tagg27", "dataset_name": "seoul-bike-trip", "file_path": "./data/", "filename": "cleaned_seoul_bike_data.csv"}
-    seoul_bike_trips.serve(name="Seoul city bike trips",parameters=parameters,schedule=IntervalSchedule(interval=timedelta(days=1),anchor_date=datetime(2024,1,1,0,0),timezone="Europe/Berlin"))
-    # seoul_bike_trips()
-    #seoul_bike_trips(parameters)
+    seoul_bike_trips.serve(name="Seoul city bike - Populate GCS",parameters=parameters,schedule=IntervalSchedule(interval=timedelta(days=1),anchor_date=datetime(2024,1,1,0,0),timezone="Europe/Berlin"))
    
