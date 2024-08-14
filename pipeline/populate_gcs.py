@@ -34,7 +34,7 @@ def download_data(dataset_owner: str, dataset_name: str, path: str, file_name: s
         print("Directory already exists, there is no need to create it.")
         
     my_file = Path(f"{path}{file_name}")
-    # print(my_file)
+    print(my_file)
     
     if my_file.is_file():
         print("File already exists, there is no need to download it.")
@@ -92,12 +92,12 @@ def upload_to_gcs(df: pl.DataFrame, root_path: str):
         )    
     
 @flow(name='Ingest data to GCS')
-def seoul_bike_trips(dataset_owner: str, dataset_name: str, file_path: str, filename: str):
-# def seoul_bike_trips():
-    # dataset_owner = "tagg27"
-    # dataset_name = "seoul-bike-data"
-    # file_path = "./data/"
-    # filename = "cleaned_seoul_bike_data.csv"
+# def seoul_bike_trips(dataset_owner: str, dataset_name: str, file_path: str, filename: str):
+def seoul_bike_trips():
+    dataset_owner = "tagg27"
+    dataset_name = "seoul-bike-data"
+    file_path = "./data/raw/"
+    filename = "cleaned_seoul_bike_data.csv"
     
     #download (if necessary) the data
     download_data(dataset_owner, dataset_name, file_path, filename)
@@ -113,6 +113,7 @@ def seoul_bike_trips(dataset_owner: str, dataset_name: str, file_path: str, file
     #upload_to_gcs(root_path=gcs_path,local_path=parquet_path)
 
 if __name__ == "__main__":
-    parameters = {"dataset_owner": "tagg27", "dataset_name": "seoul-bike-trip", "file_path": "./data/", "filename": "cleaned_seoul_bike_data.csv"}
+    parameters = {"dataset_owner": "tagg27", "dataset_name": "seoul-bike-trip", "file_path": "./data/raw/", "filename": "cleaned_seoul_bike_data.csv"}
     seoul_bike_trips.serve(name="Seoul city bike - Populate GCS",parameters=parameters,schedule=IntervalSchedule(interval=timedelta(days=1),anchor_date=datetime(2024,1,1,0,0),timezone="Europe/Berlin"))
+    # seoul_bike_trips()
    
