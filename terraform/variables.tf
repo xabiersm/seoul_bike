@@ -40,22 +40,6 @@ variable "gcs_storage_class" {
   default     = "STANDARD"
 }
 
-variable "gcs_cluster_bucket_name" {
-  description = "My Storage Bucket Name"
-  #Update the below to a unique bucket name
-  default     = "seoul-bike-trips-spark-cluster"
-}
-
-variable "dataproc_cluster_name" {
-  description = "Dataproc cluster for Spark jobs"
-  default = "dataproc-spark-cluster"
-}
-
-variable "dataproc_cluster_zone" {
-  description = "Dataproc cluster for Spark jobs"
-  default = "europe-west9-a"
-}
-
 variable "gce_service_account" {
   description = "Dataproc service account"
   default = "seoul-bike-data@useful-circle-430118-u0.iam.gserviceaccount.com"
